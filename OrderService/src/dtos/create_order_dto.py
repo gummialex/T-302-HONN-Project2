@@ -8,8 +8,8 @@ class CreditCard(BaseModel):
 
 
 class CreateOrder(BaseModel):
-    productID: int
-    merchantID: int
-    buyerID: int
+    productId: int
+    merchantId: int
+    buyerId: int
     creditCard: CreditCard
     discount: float | None=None
