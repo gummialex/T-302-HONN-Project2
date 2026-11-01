@@ -19,21 +19,34 @@ class OrderService:
         self._inventory_client = inventory_client
         self._event_publisher = event_publisher
 
-    def get_all_orders(self):
+    def get_all_orders(self):   # ? do we need this
         # return all orders
         pass
 
     def create_order(self, request: CreateOrder) -> Order:
-        # reserve order
+
         self._validate(request)
 
         price = self._inventory_client.get_price(request.productId)
         total_price = price * (1 - (request.discount or 0))
 
-        order = Order()
-        # store order
-        # publish event
-        pass
+        # Create the order
+        order = Order(
+            productId=request.productId,
+            merchantId=request.merchantId,
+            buyerId=request.buyerId,
+            cardNumber=self.mask(request.creditCard.cardNumber),    # need mask for creditcard masking
+            totalPrice=total_price
+        )
+
+        # Store the event in DB
+        stored = self._repository.save(order)
+
+        # Publishing the event with RabbitMQ
+        self._event_publisher.publish_order_created(stored, request.creditCard)
+
+        return stored
+
 
     def _validate(self, request: CreateOrder) -> None:
         if not self._merchant_exists(request.merchantId):
