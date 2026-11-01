@@ -1,15 +1,18 @@
 from fastapi import HTTPException
 from dtos.create_order_dto import CreateOrder
 from models.order import Order
+from infrastructure.order_repository import OrderDB
+
 
 
 class OrderService:
     def __init__(self):
         self.orders = "ordersDB"
-        self.next_id =  123 # vantar logic fyrir id
+        self.next_id =  1 # vantar logic fyrir id?
 
     def get_all_orders(self) -> list[Order]:
-        return self.orders
+        # return all orders
+        pass
 
     def create_order(self, request: CreateOrder) -> Order:
         # reserve order
@@ -33,7 +36,7 @@ class OrderService:
         if not self._product_belongs_to_merchant(request.productId, request.merchantId):
             raise HTTPException(status_code=400, detail='Product does not belong to merchant')
         
-        if not self._merchant_allows_discount(request.merchantId):
+        if request.discount and not self._merchant_allows_discount(request.merchantId):
             raise HTTPException(status_code=400, detail='Merchant does not allow discount')
         
 
@@ -45,7 +48,7 @@ class OrderService:
         # kalla í OrderDB sem kallar í BuyerService ?
         pass
 
-    def _product_exists(self, buyer_id: int) -> bool:
+    def _product_exists(self, product_id: int) -> bool:
         # kalla í InventoryService
         pass
 
