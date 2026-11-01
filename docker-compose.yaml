@@ -1,0 +1,174 @@
+# Run from the project root: docker compose up --build
+# To work only on MerchantService: docker compose up --build merchant-service
+services:
+  merchant-service:
+    build: ./MerchantService
+    ports:
+      - "8001:8000"
+    environment:
+      DATABASE_URL: postgresql://merchant:merchant_dev_password@merchant-db:5432/merchants
+    depends_on:
+      merchant-db:
+        condition: service_healthy
+
+  merchant-db:
+    image: postgres:17
+    environment:
+      POSTGRES_USER: merchant
+      POSTGRES_PASSWORD: merchant_dev_password
+      POSTGRES_DB: merchants
+    volumes:
+      - merchant_data:/var/lib/postgresql/data
+      # Add when MerchantService/database/init.sql exists:
+      # - ./MerchantService/database/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U merchant -d merchants"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  buyer-service:
+    build: ./BuyerService
+    ports:
+      - "8002:8000"
+    environment:
+      DATABASE_URL: postgresql://buyer:buyer_dev_password@buyer-db:5432/buyers
+    depends_on:
+      buyer-db:
+        condition: service_healthy
+
+  buyer-db:
+    image: postgres:17
+    environment:
+      POSTGRES_USER: buyer
+      POSTGRES_PASSWORD: buyer_dev_password
+      POSTGRES_DB: buyers
+    volumes:
+      - buyer_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U buyer -d buyers"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  inventory-service:
+    build: ./InventoryService
+    ports:
+      - "8003:8000"
+    environment:
+      DATABASE_URL: postgresql://inventory:inventory_dev_password@inventory-db:5432/inventory
+      RABBITMQ_URL: amqp://project:project_dev_password@rabbitmq:5672/
+    depends_on:
+      inventory-db:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+
+  inventory-db:
+    image: postgres:17
+    environment:
+      POSTGRES_USER: inventory
+      POSTGRES_PASSWORD: inventory_dev_password
+      POSTGRES_DB: inventory
+    volumes:
+      - inventory_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U inventory -d inventory"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  order-service:
+    build: ./OrderService
+    ports:
+      - "8000:8000"
+    environment:
+      DATABASE_URL: postgresql://orders:orders_dev_password@order-db:5432/orders
+      MERCHANT_SERVICE_URL: http://merchant-service:8000
+      BUYER_SERVICE_URL: http://buyer-service:8000
+      INVENTORY_SERVICE_URL: http://inventory-service:8000
+      RABBITMQ_URL: amqp://project:project_dev_password@rabbitmq:5672/
+    depends_on:
+      order-db:
+        condition: service_healthy
+      merchant-service:
+        condition: service_started
+      buyer-service:
+        condition: service_started
+      inventory-service:
+        condition: service_started
+      rabbitmq:
+        condition: service_healthy
+
+  order-db:
+    image: postgres:17
+    environment:
+      POSTGRES_USER: orders
+      POSTGRES_PASSWORD: orders_dev_password
+      POSTGRES_DB: orders
+    volumes:
+      - order_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U orders -d orders"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  payment-service:
+    build: ./PaymentService
+    environment:
+      DATABASE_URL: postgresql://payment:payment_dev_password@payment-db:5432/payments
+      RABBITMQ_URL: amqp://project:project_dev_password@rabbitmq:5672/
+    depends_on:
+      payment-db:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+
+  payment-db:
+    image: postgres:17
+    environment:
+      POSTGRES_USER: payment
+      POSTGRES_PASSWORD: payment_dev_password
+      POSTGRES_DB: payments
+    volumes:
+      - payment_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U payment -d payments"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  email-service:
+    build: ./EmailService
+    environment:
+      RABBITMQ_URL: amqp://project:project_dev_password@rabbitmq:5672/
+    # Add this once EmailService/.env exists (contains SENDGRID_API_KEY and SENDGRID_SENDER_EMAIL):
+    # env_file:
+    #   - ./EmailService/.env
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+
+  rabbitmq:
+    image: rabbitmq:4-management
+    ports:
+      - "127.0.0.1:15672:15672" # RabbitMQ management UI for local development
+    environment:
+      RABBITMQ_DEFAULT_USER: project
+      RABBITMQ_DEFAULT_PASS: project_dev_password
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 10s
+      timeout: 10s
+      retries: 10
+
+volumes:
+  merchant_data:
+  buyer_data:
+  inventory_data:
+  order_data:
+  payment_data:
+  rabbitmq_data:
