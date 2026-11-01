@@ -1,12 +1,12 @@
 from fastapi import HTTPException
-from dtos.create_order_dto import CreateOrder
-from models.order import Order
-from infrastructure.order_repository import OrderDB
-from infrastructure.buyer_client import BuyerClient
-from infrastructure.inventory_client import InventoryClient
-from infrastructure.merchant_client import MerchantClient
-from infrastructure.event_publisher import EventPublisher
-from infrastructure.get_service import get_order_service
+from OrderService.src.dtos.create_order_dto import CreateOrder
+from OrderService.src.models.order import Order
+from OrderService.src.infrastructure.order_repository import OrderDB
+from OrderService.src.infrastructure.buyer_client import BuyerClient
+from OrderService.src.infrastructure.inventory_client import InventoryClient
+from OrderService.src.infrastructure.merchant_client import MerchantClient
+from OrderService.src.infrastructure.event_publisher import EventPublisher
+from OrderService.src.infrastructure.get_service import get_order_service
 
 
 
@@ -19,12 +19,18 @@ class OrderService:
         self._inventory_client = inventory_client
         self._event_publisher = event_publisher
 
-    def get_all_orders(self) -> list[Order]:
+    def get_all_orders(self):
         # return all orders
         pass
 
     def create_order(self, request: CreateOrder) -> Order:
         # reserve order
+        self._validate(request)
+
+        price = self._inventory_client.get_price(request.productId)
+        total_price = price * (1 - (request.discount or 0))
+
+        order = Order()
         # store order
         # publish event
         pass
