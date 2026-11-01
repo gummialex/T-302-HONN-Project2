@@ -2,13 +2,22 @@ from fastapi import HTTPException
 from dtos.create_order_dto import CreateOrder
 from models.order import Order
 from infrastructure.order_repository import OrderDB
+from infrastructure.buyer_client import BuyerClient
+from infrastructure.inventory_client import InventoryClient
+from infrastructure.merchant_client import MerchantClient
+from infrastructure.event_publisher import EventPublisher
+from infrastructure.get_service import get_order_service
+
 
 
 
 class OrderService:
-    def __init__(self):
-        self.orders = "ordersDB"
-        self.next_id =  1 # vantar logic fyrir id?
+    def __init__(self, order_repository: OrderDB, merchant_client: MerchantClient, buyer_client: BuyerClient, inventory_client: InventoryClient, event_publisher: EventPublisher):
+        self._repository = order_repository
+        self._merchant_client = merchant_client
+        self._buyer_client = buyer_client
+        self._inventory_client = inventory_client
+        self._event_publisher = event_publisher
 
     def get_all_orders(self) -> list[Order]:
         # return all orders
