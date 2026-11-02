@@ -22,7 +22,7 @@ services:
       # Add when MerchantService/database/init.sql exists:
       # - ./MerchantService/database/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U merchant -d merchants"]
+      test: [ "CMD-SHELL", "pg_isready -U merchant -d merchants" ]
       interval: 5s
       timeout: 5s
       retries: 10
@@ -46,7 +46,7 @@ services:
     volumes:
       - buyer_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U buyer -d buyers"]
+      test: [ "CMD-SHELL", "pg_isready -U buyer -d buyers" ]
       interval: 5s
       timeout: 5s
       retries: 10
@@ -73,7 +73,7 @@ services:
     volumes:
       - inventory_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U inventory -d inventory"]
+      test: [ "CMD-SHELL", "pg_isready -U inventory -d inventory" ]
       interval: 5s
       timeout: 5s
       retries: 10
@@ -108,8 +108,9 @@ services:
       POSTGRES_DB: orders
     volumes:
       - order_data:/var/lib/postgresql/data
+      - ./OrderService/database/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U orders -d orders"]
+      test: [ "CMD-SHELL", "pg_isready -U orders -d orders" ]
       interval: 5s
       timeout: 5s
       retries: 10
@@ -134,7 +135,7 @@ services:
     volumes:
       - payment_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U payment -d payments"]
+      test: [ "CMD-SHELL", "pg_isready -U payment -d payments" ]
       interval: 5s
       timeout: 5s
       retries: 10
@@ -160,7 +161,7 @@ services:
     volumes:
       - rabbitmq_data:/var/lib/rabbitmq
     healthcheck:
-      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      test: [ "CMD", "rabbitmq-diagnostics", "-q", "ping" ]
       interval: 10s
       timeout: 10s
       retries: 10
