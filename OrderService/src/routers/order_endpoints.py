@@ -10,7 +10,7 @@ router = APIRouter(prefix='/orders')
 
 @router.post('', status_code=status.HTTP_201_CREATED)
 def create_order(request: CreateOrder, order_service: OrderService = Depends(get_order_service)):
-    order = order_service(request)
+    order = order_service.create_order(request)
     return order.id
 
 @router.get('/{order_id}')
