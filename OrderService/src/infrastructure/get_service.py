@@ -6,9 +6,9 @@ OrderService talks to by editing here, not by editing the service.
 
 from functools import lru_cache
 
-from OrderService.src.infrastructure.settings import Settings
-from OrderService.src.infrastructure.order_repository import OrderRepository
-from OrderService.src.services.order_service import OrderService
+from infrastructure.settings import Settings
+from infrastructure.order_repository import OrderRepository
+from services.order_service import OrderService
 
 
 @lru_cache
