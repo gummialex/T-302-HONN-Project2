@@ -1,7 +1,7 @@
 from psycopg_pool import ConnectionPool
 from psycopg.rows import dict_row
 
-from import models.order import Order
+from models.order import Order
 
 
 class OrderRepository:

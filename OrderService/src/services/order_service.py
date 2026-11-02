@@ -21,14 +21,23 @@ class OrderService:
             productId=request.productId,
             merchantId=request.merchantId,
             buyerId=request.buyerId,
-            cardNumber=request.creditCard.cardNumber,    # TODO: mask for credit card
+            cardNumber=self._mask(request.creditCard.cardNumber),    # TODO: mask for credit card
             totalPrice=total_price,
         )
 
         return self._repository.save(order)
 
+    @staticmethod
+    def _mask(card_number: str):
+        last_digits = card_number[-4:]
+
+        total_hidden = "*" * (len(card_number) - len(last_digits))
+
+        return total_hidden + last_digits
+
+
     def get_order_by_id(self, order_id: int) -> Order:
-        order = self._repository.get_by_id(order_id)
+        order = self._repository.get_order_by_id(order_id)
 
         if order is None:
             raise HTTPException(status_code=404, detail='Order does not exist')
