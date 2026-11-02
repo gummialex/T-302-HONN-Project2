@@ -91,12 +91,12 @@ services:
     depends_on:
       order-db:
         condition: service_healthy
-      merchant-service:
-        condition: service_started
-      buyer-service:
-        condition: service_started
-      inventory-service:
-        condition: service_started
+      # merchant-service:
+      #   condition: service_started
+      # buyer-service:
+      #   condition: service_started
+      # inventory-service:
+      #   condition: service_started
       rabbitmq:
         condition: service_healthy
 

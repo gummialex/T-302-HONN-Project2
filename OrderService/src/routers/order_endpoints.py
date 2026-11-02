@@ -1,11 +1,11 @@
-from  fastapi import APIrouter, Depends, status
+from  fastapi import APIRouter, Depends, status
 
 from dtos.create_order_dto import CreateOrder
 from infrastructure.get_service import get_order_service
 from services.order_service import OrderService
 
 
-router = APIrouter(prefix='/orders')
+router = APIRouter(prefix='/orders')
 
 
 @router.post('', status_code=status.HTTP_201_CREATED)
