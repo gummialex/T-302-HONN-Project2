@@ -18,9 +18,8 @@ services:
       POSTGRES_PASSWORD: merchant_dev_password
       POSTGRES_DB: merchants
     volumes:
-      - merchant_data:/var/lib/postgresql/data
-      # Add when MerchantService/database/init.sql exists:
-      # - ./MerchantService/database/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+        - merchant_data:/var/lib/postgresql/data
+        - ./MerchantService/database/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
     healthcheck:
       test: [ "CMD-SHELL", "pg_isready -U merchant -d merchants" ]
       interval: 5s
