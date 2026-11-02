@@ -1,49 +1,31 @@
 from fastapi import HTTPException
-from OrderService.src.dtos.create_order_dto import CreateOrder
-from OrderService.src.models.order import Order
-from OrderService.src.infrastructure.order_repository import OrderDB
-from OrderService.src.infrastructure.buyer_client import BuyerClient
-from OrderService.src.infrastructure.inventory_client import InventoryClient
-from OrderService.src.infrastructure.merchant_client import MerchantClient
-from OrderService.src.infrastructure.event_publisher import EventPublisher
+
+from dtos.create_order_dto import CreateOrder
+from models.order import Order
+from infrastructure.order_repository import OrderRepository
 
 
 
 class OrderService:
-    def __init__(self, order_repository: OrderDB, merchant_client: MerchantClient, buyer_client: BuyerClient, inventory_client: InventoryClient, event_publisher: EventPublisher):
+    def __init__(self, order_repository: OrderRepository):  # DPI
         self._repository = order_repository
-        self._merchant_client = merchant_client
-        self._buyer_client = buyer_client
-        self._inventory_client = inventory_client
-        self._event_publisher = event_publisher
 
-    def get_all_orders(self):   # ? do we need this
-        # return all orders
-        pass
 
     def create_order(self, request: CreateOrder) -> Order:
-
+        
         self._validate(request)
 
-        price = self._inventory_client.get_price(request.productId)
-        total_price = price * (1 - (request.discount or 0))
+        total_price = 0.0 # TODO: get the price from InventoryService
 
-        # Create the order
         order = Order(
             productId=request.productId,
             merchantId=request.merchantId,
             buyerId=request.buyerId,
-            cardNumber=self.mask(request.creditCard.cardNumber),    # need mask for creditcard masking
-            totalPrice=total_price
+            cardNumber=request.creditCard.cardNumber,    # TODO: mask for credit card
+            totalPrice=total_price,
         )
 
-        # Store the event in DB
-        stored = self._repository.save(order)
-
-        # Publishing the event with RabbitMQ
-        self._event_publisher.publish_order_created(stored, request.creditCard)
-
-        return stored
+        return self._repository.save(order)
 
 
     def _validate(self, request: CreateOrder) -> None:

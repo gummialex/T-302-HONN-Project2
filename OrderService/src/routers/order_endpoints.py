@@ -1,12 +1,18 @@
 from  fastapi import APIrouter, Depends, status
 
+from dtos.create_order_dto import CreateOrder
+from infrastructure.get_service import get_order_service
+from services.order_service import OrderService
 
 
-@router.get('/orders')
-def get_orders():
-    pass
+router = APIrouter(prefix='/orders')
 
-@router.post('/orders')
-def post_orders():
-    pass
 
+@router.post('', status_code=status.HTTP_201_CREATED)
+def create_order(request: CreateOrder, order_service: OrderService = Depends(get_order_service)):
+    order = order_service(request)
+    return order.id
+
+@router.get('/{order_id}')
+def get_orders(order_id: int, order_service: OrderService = Depends(get_order_service)):
+    return order_service.get_order_by_id(order_id)
