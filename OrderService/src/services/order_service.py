@@ -27,6 +27,14 @@ class OrderService:
 
         return self._repository.save(order)
 
+    def get_order_by_id(self, order_id: int) -> Order:
+        order = self._repository.get_by_id(order_id)
+
+        if order is None:
+            raise HTTPException(status_code=404, detail='Order does not exist')
+
+        return order
+
 
     def _validate(self, request: CreateOrder) -> None:
         if not self._merchant_exists(request.merchantId):
@@ -49,25 +57,25 @@ class OrderService:
         
 
     def _merchant_exists(self, merchant_id: int) -> bool:
-        # kalla í MerchantService
-        pass
+        # TODO: kalla i MerchantService
+        return True
 
     def _buyer_exists(self, buyer_id: int) -> bool:
-        # kalla í OrderDB sem kallar í BuyerService ?
-        pass
+        # TODO: kalla i BuyerService
+        return True
 
     def _product_exists(self, product_id: int) -> bool:
-        # kalla í InventoryService
-        pass
+        # TODO: kalla i InventoryService
+        return True
 
     def _product_in_stock(self, product_id: int) -> bool:
-        # kalla í InventoryService
-        pass
+        # TODO: kalla i InventoryService
+        return True
 
     def _product_belongs_to_merchant(self, product_id: int, merchant_id: int) -> bool:
-        # kalla í InventoryService
-        pass
+        # TODO: kalla i InventoryService
+        return True
 
     def _merchant_allows_discount(self, merchant_id: int) -> bool:
-        # Kalla i MerchantService
-        pass
+        # TODO: kalla i MerchantService
+        return True
