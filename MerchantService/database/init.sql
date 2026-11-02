@@ -1,4 +1,3 @@
-
 CREATE TABLE IF NOT EXISTS merchants (
     id SERIAL PRIMARY KEY,
     name VARCHAR(255) NOT NULL,
