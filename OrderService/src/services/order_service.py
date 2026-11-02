@@ -6,8 +6,6 @@ from OrderService.src.infrastructure.buyer_client import BuyerClient
 from OrderService.src.infrastructure.inventory_client import InventoryClient
 from OrderService.src.infrastructure.merchant_client import MerchantClient
 from OrderService.src.infrastructure.event_publisher import EventPublisher
-from OrderService.src.infrastructure.get_service import get_order_service
-
 
 
 
