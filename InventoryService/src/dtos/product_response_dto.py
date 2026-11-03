@@ -1,8 +1,8 @@
-from pydantic import BaseModel, Field
+from pydantic import BaseModel
 
-class CreateProductDTO(BaseModel):
+class ProductResponseDTO(BaseModel):
     merchantId: int
-    pruductName: str
+    productName: str
     price: float
     quantity: int
     reserved: int
