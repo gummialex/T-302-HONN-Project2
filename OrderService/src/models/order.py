@@ -8,4 +8,4 @@ class Order:
     buyerId: int
     cardNumber: str
     totalPrice: float
-    id: int = None
+    id: int | None = None
