@@ -1,7 +1,6 @@
 import json
-from dataclasses import asdict
-
 import pika
+from dataclasses import asdict
 
 from dtos.order_created_event import OrderCreatedEvent
 
