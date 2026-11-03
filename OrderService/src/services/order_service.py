@@ -1,6 +1,7 @@
 from fastapi import HTTPException
 
-from dtos.create_order_dto import CreateOrder, OrderCreatedEvent
+from dtos.create_order_dto import CreateOrder
+from dtos.order_created_event import OrderCreatedEvent
 from models.order import Order
 from infrastructure.order_repository import OrderRepository
 from infrastructure.merchant_client import MerchantClient
