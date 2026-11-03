@@ -11,7 +11,7 @@ from infrastructure.event_publisher import EventPublisher
 
 
 class OrderService:
-    # DI
+    
     def __init__(
         self,
         order_repository: OrderRepository,
@@ -36,7 +36,7 @@ class OrderService:
 
         total_price = product["price"] * (1 - (request.discount or 0))
 
-        self._inventory_client.reserve(request.productId)
+        self._inventory_client.reserve_product(request.productId)
 
         order = Order(
             productId=request.productId,
@@ -47,6 +47,7 @@ class OrderService:
         )
         stored = self._repository.save(order)
 
+        # create an event for the event_publisher
         event = OrderCreatedEvent(
             orderId=stored.id,
             productId=stored.productId,
