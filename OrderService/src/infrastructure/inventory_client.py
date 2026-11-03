@@ -19,7 +19,7 @@ class InventoryClient:
 
     def reserve_product(self, product_id: int) -> None:
         """Reserves one unit of the product"""
-        
-        response = self._client.get(f"/products/{product_id}/reserve")
+
+        response = self._client.post(f"/products/{product_id}/reserve")
         response.raise_for_status()
 
