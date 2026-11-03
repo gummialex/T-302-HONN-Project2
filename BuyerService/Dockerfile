@@ -1,15 +1,14 @@
-FROM python:3.11-slim
+
+FROM python:3.13-slim
 
 WORKDIR /app
 
-ENV PYTHONUNBUFFERED=1
-
-COPY requirements.txt requirements.txt
+COPY requirements.txt .
 
 RUN pip install --no-cache-dir -r requirements.txt
 
-COPY src/ .
+COPY src/ ./src/
 
 EXPOSE 8000
 
-CMD [ "python", "startup.py"]
+CMD ["uvicorn", "src.startup:app", "--host", "0.0.0.0", "--port", "8000"]

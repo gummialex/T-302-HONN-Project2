@@ -1,8 +1,6 @@
 from fastapi import FastAPI
-from MerchantService.src.dtos.create_merchant_dto import Merchant
+from src.routers.merchant_endpoints import router
 
 app = FastAPI()
 
-@app.post("/merchant")
-def create_mercant(merchant : Merchant):
-    pass
+app.include_router(router)

@@ -2,7 +2,7 @@ from pydantic import BaseModel
 
 class Merchant(BaseModel):
     name: str
-    ss: str
+    ssn: str
     email : str
     phoneNumber :  str
     allowsDiscount : bool
