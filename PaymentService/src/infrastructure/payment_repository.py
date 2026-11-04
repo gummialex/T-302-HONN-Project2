@@ -53,7 +53,6 @@ class PaymentRepository:
 
         return stored_payment
 
-
     def get_by_order_id(self, order_id: int) -> Payment | None:
         with get_connection() as conn:
             with conn.cursor() as cursor:

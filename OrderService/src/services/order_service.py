@@ -36,7 +36,12 @@ class OrderService:
 
         total_price = product["price"] * (1 - (request.discount or 0))
 
-        self._inventory_client.reserve_product(request.productId)
+        order_id = self._repository.allocate_id()
+
+        self._inventory_client.reserve_product(
+            request.productId,
+            order_id,
+        )
 
         order = Order(
             productId=request.productId,
@@ -44,6 +49,7 @@ class OrderService:
             buyerId=request.buyerId,
             cardNumber=self._mask(request.creditCard.cardNumber),
             totalPrice=total_price,
+            id=order_id,
         )
         stored = self._repository.save(order)
 
