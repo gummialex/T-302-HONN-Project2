@@ -1,10 +1,27 @@
 # Run from the project root: docker compose up --build
-# To work only on MerchantService: docker compose up --build merchant-service
+# Only the API layer is reachable from the host, on port 8000.
 services:
+  api-layer:
+    build: ./ApiLayer
+    ports:
+      - "8000:8000"
+    environment:
+      ORDER_SERVICE_URL: http://order-service:8000
+      MERCHANT_SERVICE_URL: http://merchant-service:8000
+      BUYER_SERVICE_URL: http://buyer-service:8000
+      INVENTORY_SERVICE_URL: http://inventory-service:8000
+    depends_on:
+      order-service:
+        condition: service_started
+      merchant-service:
+        condition: service_started
+      buyer-service:
+        condition: service_started
+      inventory-service:
+        condition: service_started
+
   merchant-service:
     build: ./MerchantService
-    ports:
-      - "8001:8000"
     environment:
       DATABASE_URL: postgresql://merchant:merchant_dev_password@merchant-db:5432/merchants
     depends_on:
@@ -18,8 +35,8 @@ services:
       POSTGRES_PASSWORD: merchant_dev_password
       POSTGRES_DB: merchants
     volumes:
-        - merchant_data:/var/lib/postgresql/data
-        - ./MerchantService/database/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+      - merchant_data:/var/lib/postgresql/data
+      - ./MerchantService/database/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
     healthcheck:
       test: [ "CMD-SHELL", "pg_isready -U merchant -d merchants" ]
       interval: 5s
@@ -28,8 +45,6 @@ services:
 
   buyer-service:
     build: ./BuyerService
-    ports:
-      - "8002:8000"
     environment:
       DATABASE_URL: postgresql://buyer:buyer_dev_password@buyer-db:5432/buyers
     depends_on:
@@ -53,8 +68,6 @@ services:
 
   inventory-service:
     build: ./InventoryService
-    ports:
-      - "8003:8000"
     environment:
       DATABASE_URL: postgresql://inventory:inventory_dev_password@inventory-db:5432/inventory
       RABBITMQ_URL: amqp://project:project_dev_password@rabbitmq:5672/
@@ -81,8 +94,6 @@ services:
 
   order-service:
     build: ./OrderService
-    ports:
-      - "8000:8000"
     environment:
       DATABASE_URL: postgresql://orders:orders_dev_password@order-db:5432/orders
       MERCHANT_SERVICE_URL: http://merchant-service:8000
@@ -141,10 +152,8 @@ services:
       timeout: 5s
       retries: 10
 
-
   email-service:
     build: ./EmailService
-    restart: on-failure
     env_file:
       - ./EmailService/.env
     environment:
@@ -157,8 +166,6 @@ services:
 
   rabbitmq:
     image: rabbitmq:4-management
-    ports:
-      - "127.0.0.1:15672:15672" # RabbitMQ management UI for local development
     environment:
       RABBITMQ_DEFAULT_USER: project
       RABBITMQ_DEFAULT_PASS: project_dev_password
