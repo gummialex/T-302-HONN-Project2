@@ -2,14 +2,12 @@ from fastapi import APIRouter, HTTPException
 
 from src.dtos.create_product_dto import CreateProductDTO
 from src.dtos.product_response_dto import ProductResponseDTO
-from src.infrastructure.repository import ProductRepository
-from src.services.inventory_service import InventoryService
+from src.dtos.reserve_product_dto import ReserveProductDTO
+
+from src.dependencies import inventory_service as service
 
 
 router = APIRouter()
-
-repository = ProductRepository()
-service = InventoryService(repository)
 
 
 @router.post("/products", status_code=201)
@@ -38,8 +36,17 @@ def get_product(product_id: int):
         reserved=product.reserved,
     )
 
-@router.post("/products/{product_id}/reserve", status_code=200)
-def reserve_product(product_id: int):
-    service.reserve_product(product_id)
+@router.post("/products/{product_id}/reserve")
+def reserve_product(
+    product_id: int,
+    request: ReserveProductDTO,
+):
+    try:
+        service.reserve_product(product_id, request.orderId)
+    except ValueError as error:
+        raise HTTPException(
+            status_code=409,
+            detail=str(error),
+        ) from error
 
     return {"message": "Product reserved"}

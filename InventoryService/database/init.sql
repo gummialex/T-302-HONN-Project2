@@ -7,3 +7,9 @@ CREATE TABLE IF NOT EXISTS products (
     id SERIAL PRIMARY KEY,
     CHECK (reserved >= 0 AND reserved <= quantity)
 );
+
+CREATE TABLE IF NOT EXISTS reservations (
+    order_id INTEGER PRIMARY KEY,
+    product_id INTEGER NOT NULL REFERENCES products(id),
+    successful BOOLEAN
+);
