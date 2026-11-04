@@ -17,9 +17,10 @@ class InventoryClient:
         response.raise_for_status() # A check to ensure that everything other than 2xx becomes an exception
         return response.json()  # Parses the json body into a python dict
 
-    def reserve_product(self, product_id: int) -> None:
-        """Reserves one unit of the product"""
-
-        response = self._client.post(f"/products/{product_id}/reserve")
+    def reserve_product(self, product_id: int, order_id: int) -> None:
+        response = self._client.post(
+            f"/products/{product_id}/reserve",
+            json={"orderId": order_id},
+        )
         response.raise_for_status()
 

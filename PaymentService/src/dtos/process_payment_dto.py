@@ -4,7 +4,7 @@ class CreditCardDTO(BaseModel):
     cardNumber: str
     expirationMonth: int
     expirationYear: int
-    cvc: int
+    cvc: str
 
 
 class ProcessPaymentDTO(BaseModel):

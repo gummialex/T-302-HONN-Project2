@@ -1,6 +1,8 @@
 from src.dtos.create_product_dto import CreateProductDTO
 from src.models.product import Product
 from src.infrastructure.repository import ProductRepository
+from src.dtos.payment_result_dto import PaymentResultDTO
+
 from fastapi import HTTPException
 
 
@@ -25,8 +27,15 @@ class InventoryService:
     def get_product(self, product_id: int) -> Product | None:
         return self._repository.get_product(product_id)
 
-    def reserve_product(self, product_id: int) -> None:
-        reserved = self._repository.reserve_product(product_id)
+    def reserve_product(
+        self,
+        product_id: int,
+        order_id: int,
+    ) -> None:
+        reserved = self._repository.reserve_product(
+            product_id,
+            order_id,
+        )
 
         if reserved:
             return
@@ -42,4 +51,14 @@ class InventoryService:
         raise HTTPException(
             status_code=400,
             detail="Product is sold out",
+        )
+
+    def handle_payment_result(
+        self,
+        result: PaymentResultDTO,
+    ) -> None:
+        self._repository.apply_payment_result(
+            order_id=result.orderId,
+            product_id=result.productId,
+            successful=result.successful,
         )

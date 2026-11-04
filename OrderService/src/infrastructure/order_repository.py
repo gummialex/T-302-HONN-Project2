@@ -11,31 +11,33 @@ class OrderRepository:
         self._pool = ConnectionPool(database_url,min_size=1, max_size=5, open=True)
 
     def save(self, order: Order) -> Order:
-        """Inserts the order and sets its database-assigned id.
+        if order.id is None:
+            raise ValueError("Order ID must be allocated before saving")
 
-        Mutates the order passed in and returns the same object.
-        """
-
-        with self._pool.connection() as conn:   # Take a connection out of the pool
-            # Cursor is the obj that runs a statement and holds its result set
-            with conn.cursor(row_factory=dict_row) as cursor:
-
+        with self._pool.connection() as conn:
+            with conn.cursor() as cursor:
                 cursor.execute(
                     """
-                    INSERT INTO orders (product_id, merchant_id, buyer_id, card_number, total_price)
-                    VALUES (%s, %s, %s, %s, %s)
-                    RETURNING id
+                    INSERT INTO orders (
+                        id,
+                        product_id,
+                        merchant_id,
+                        buyer_id,
+                        card_number,
+                        total_price
+                    )
+                    VALUES (%s, %s, %s, %s, %s, %s)
                     """,
                     (
+                        order.id,
                         order.productId,
                         order.merchantId,
                         order.buyerId,
                         order.cardNumber,
-                        order.totalPrice
-                    )
+                        order.totalPrice,
+                    ),
                 )
-                row = cursor.fetchone() # pulls a single row from the result set. In this case: RETURNING id
-        order.id = row["id"]
+
         return order
 
     def get_order_by_id(self, order_id: int) -> Order | None:
@@ -69,3 +71,11 @@ class OrderRepository:
             totalPrice=row["total_price"],
             id=row["id"]
         )
+
+    def allocate_id(self) -> int:
+        with self._pool.connection() as conn:
+            with conn.cursor() as cursor:
+                cursor.execute(
+                    "SELECT nextval(pg_get_serial_sequence('orders', 'id'))"
+                )
+                return cursor.fetchone()[0]
