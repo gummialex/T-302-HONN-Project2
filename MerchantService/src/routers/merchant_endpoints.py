@@ -1,19 +1,17 @@
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Depends
 from src.dtos.merchant_dto import Merchant
 from src.services.merchant_service import MerchantService
+from src.infrastructure.get_service import get_merchant_service
 
 
-router = APIRouter()
-merchant_service = MerchantService()
+router = APIRouter(prefix='/merchants')
     
-@router.post("/merchants", status_code=201)
-def create_merchant(merchant: Merchant):
-    merchant_id = merchant_service.create_merchant(merchant)
+@router.post("", status_code=201)
+def create_merchant(merchant: Merchant, merchant_service: MerchantService = Depends(get_merchant_service)):
+    return merchant_service.create_merchant(merchant)
 
-    return {"id": merchant_id}
-
-@router.get("/merchants/{merchant_id}", response_model=Merchant)
-def get_merchant(merchant_id: int):
+@router.get("/{merchant_id}")
+def get_merchant(merchant_id: int, merchant_service: MerchantService = Depends(get_merchant_service)):
     merchant = merchant_service.get_merchant(merchant_id)
     
     if merchant is None:

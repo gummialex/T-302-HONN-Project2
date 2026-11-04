@@ -3,8 +3,8 @@ from src.infrastructure.merchant_repository import MerchantRepository
 
 
 class MerchantService:
-    def __init__(self):
-        self.__repository = MerchantRepository()
+    def __init__(self, repository: MerchantRepository):
+        self.__repository = repository
 
     def create_merchant(self, merchant: Merchant) -> int:
         merchant_id = self.__repository.save_merchant(merchant)

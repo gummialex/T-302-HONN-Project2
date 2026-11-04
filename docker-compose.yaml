@@ -142,13 +142,16 @@ services:
       timeout: 5s
       retries: 10
 
+
   email-service:
     build: ./EmailService
+    restart: on-failure
+    env_file:
+      - ./EmailService/.env
     environment:
       RABBITMQ_URL: amqp://project:project_dev_password@rabbitmq:5672/
-    # Add this once EmailService/.env exists (contains SENDGRID_API_KEY and SENDGRID_SENDER_EMAIL):
-    # env_file:
-    #   - ./EmailService/.env
+      RABBITMQ_EXCHANGE: order_events
+      EMAIL_QUEUE: email_service
     depends_on:
       rabbitmq:
         condition: service_healthy
