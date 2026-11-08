@@ -1,37 +1,59 @@
-# T-302-HONN – Project 2
+# T-302-HONN — Project 2
 
-An event-driven ordering system built with **Python (FastAPI), PostgreSQL, RabbitMQ, and Docker Compose**.
+An event-driven ordering system built with **Python, FastAPI, PostgreSQL, RabbitMQ, and Docker Compose**.
 
-## Getting started
+The system manages buyers, merchants, products, and orders through a REST API layer. When an order is created, stock is reserved and payment is simulated by validating the card details. Successful payments reduce stock; failed payments release the reservation. Resend sends order and payment notifications to the buyer and merchant.
 
-Install and start Docker Desktop, then run these commands from the project root:
+## Group members
+
+Ernir, Guðmundur og Hafþór
+
+## Startup
+
+Docker Desktop must be running. Run the commands from the folder containing `docker-compose.yaml`.
+
+1. Create `EmailService/.env` with your Resend credentials:
+
+   ```dotenv
+   RESEND_API_KEY=your_actual_api_key
+   RESEND_FROM_EMAIL=your_verified_sender_email
+   ```
+
+   Do not commit or submit this file.
+
+2. Build and start the system with two email workers:
+
+   ```bash
+   docker compose up -d --build --scale email-service=2
+   ```
+
+3. Check that the services have started:
+
+   ```bash
+   docker compose ps
+   docker compose logs --tail=30 payment-service inventory-consumer email-service
+   ```
+
+4. Open **[http://localhost:8000/docs](http://localhost:8000/docs)** to use the API.
+
+## API
+
+Only the API layer is exposed locally, on port **8000**.
+
+| Resource | Create | Retrieve |
+| --- | --- | --- |
+| Merchants | `POST /api/merchants` | `GET /api/merchants/{id}` |
+| Buyers | `POST /api/buyers` | `GET /api/buyers/{id}` |
+| Products | `POST /api/products` | `GET /api/products/{id}` |
+| Orders | `POST /api/orders` | `GET /api/orders/{id}` |
+
+Create a merchant and buyer first, then a product and an order using the returned IDs. Use valid recipient email addresses. Payment and email processing happen asynchronously after order creation; no money is charged.
+
+## Logs and shutdown
 
 ```bash
-# Start all services (once their Dockerfiles are ready)
-docker compose up --build
-
-# Or start just MerchantService and its PostgreSQL database
-docker compose up --build merchant-service
+docker compose logs -f
+docker compose down
 ```
 
-## Service ports
-
-| Service | Local address |
-| --- | --- |
-| OrderService | http://localhost:8000 |
-| MerchantService | http://localhost:8001 |
-| BuyerService | http://localhost:8002 |
-| InventoryService | http://localhost:8003 |
-| RabbitMQ management | http://localhost:15672 |
-
-PaymentService and EmailService run internally without exposed HTTP ports. Each service with a database has its own PostgreSQL container and persistent Docker volume.
-
-## Useful commands
-
-```bash
-docker compose ps                    # Running containers
-docker compose logs -f merchant-service
-docker compose down                  # Stop containers, keep database data
-```
-
-**Note:** The project is under development. Starting all services requires a working Dockerfile in each service folder. Avoid `docker compose down -v` unless you intend to delete the database volumes.
+Named Docker volumes preserve database and RabbitMQ data between runs. Avoid `docker compose down -v` unless you intend to delete that data.
