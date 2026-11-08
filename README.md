@@ -19,7 +19,6 @@ Docker Desktop must be running. Run the commands from the folder containing `doc
    RESEND_FROM_EMAIL=your_verified_sender_email
    ```
 
-   Do not commit or submit this file.
 
 2. Build and start the system with two email workers:
 
