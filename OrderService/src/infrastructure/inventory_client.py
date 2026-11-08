@@ -1,4 +1,4 @@
-
+from fastapi import HTTPException
 import httpx
 
 class InventoryClient:
@@ -22,5 +22,11 @@ class InventoryClient:
             f"/products/{product_id}/reserve",
             json={"orderId": order_id},
         )
-        response.raise_for_status()
 
+        if response.status_code == 400:
+            raise HTTPException(
+                status_code=400,
+                detail="Product is sold out",
+            )
+
+        response.raise_for_status()
