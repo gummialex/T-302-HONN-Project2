@@ -1,8 +1,11 @@
+
 # Run from the project root: docker compose up --build
 # Only the API layer is reachable from the host, on port 8000.
+
 services:
   api-layer:
     build: ./ApiLayer
+    restart: on-failure
     ports:
       - "8000:8000"
     environment:
@@ -22,6 +25,7 @@ services:
 
   merchant-service:
     build: ./MerchantService
+    restart: on-failure
     environment:
       DATABASE_URL: postgresql://merchant:merchant_dev_password@merchant-db:5432/merchants
     depends_on:
@@ -30,6 +34,7 @@ services:
 
   merchant-db:
     image: postgres:17
+    restart: on-failure
     environment:
       POSTGRES_USER: merchant
       POSTGRES_PASSWORD: merchant_dev_password
@@ -45,6 +50,7 @@ services:
 
   buyer-service:
     build: ./BuyerService
+    restart: on-failure
     environment:
       DATABASE_URL: postgresql://buyer:buyer_dev_password@buyer-db:5432/buyers
     depends_on:
@@ -53,6 +59,7 @@ services:
 
   buyer-db:
     image: postgres:17
+    restart: on-failure
     environment:
       POSTGRES_USER: buyer
       POSTGRES_PASSWORD: buyer_dev_password
@@ -68,6 +75,20 @@ services:
 
   inventory-service:
     build: ./InventoryService
+    restart: on-failure
+    environment:
+      DATABASE_URL: postgresql://inventory:inventory_dev_password@inventory-db:5432/inventory
+      RABBITMQ_URL: amqp://project:project_dev_password@rabbitmq:5672/
+    depends_on:
+      inventory-db:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+
+  inventory-consumer:
+    build: ./InventoryService
+    command: ["python", "-u", "-m", "src.rabbitmq_worker"]
+    restart: on-failure
     environment:
       DATABASE_URL: postgresql://inventory:inventory_dev_password@inventory-db:5432/inventory
       RABBITMQ_URL: amqp://project:project_dev_password@rabbitmq:5672/
@@ -79,6 +100,7 @@ services:
 
   inventory-db:
     image: postgres:17
+    restart: on-failure
     environment:
       POSTGRES_USER: inventory
       POSTGRES_PASSWORD: inventory_dev_password
@@ -94,6 +116,7 @@ services:
 
   order-service:
     build: ./OrderService
+    restart: on-failure
     environment:
       DATABASE_URL: postgresql://orders:orders_dev_password@order-db:5432/orders
       MERCHANT_SERVICE_URL: http://merchant-service:8000
@@ -114,6 +137,7 @@ services:
 
   order-db:
     image: postgres:17
+    restart: on-failure
     environment:
       POSTGRES_USER: orders
       POSTGRES_PASSWORD: orders_dev_password
@@ -129,6 +153,7 @@ services:
 
   payment-service:
     build: ./PaymentService
+    restart: on-failure
     environment:
       DATABASE_URL: postgresql://payment:payment_dev_password@payment-db:5432/payments
       RABBITMQ_URL: amqp://project:project_dev_password@rabbitmq:5672/
@@ -140,6 +165,7 @@ services:
 
   payment-db:
     image: postgres:17
+    restart: on-failure
     environment:
       POSTGRES_USER: payment
       POSTGRES_PASSWORD: payment_dev_password
@@ -155,6 +181,7 @@ services:
 
   email-service:
     build: ./EmailService
+    restart: on-failure
     env_file:
       - ./EmailService/.env
     environment:
@@ -167,6 +194,7 @@ services:
 
   rabbitmq:
     image: rabbitmq:4-management
+    restart: on-failure
     environment:
       RABBITMQ_DEFAULT_USER: project
       RABBITMQ_DEFAULT_PASS: project_dev_password
